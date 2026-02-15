@@ -13,13 +13,11 @@ body{
     background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     color:white;
     text-align:center;
-    overflow-x:hidden;
 }
 
 h1{
     margin-top:40px;
-    font-size:50px;
-    letter-spacing:3px;
+    font-size:48px;
     background:linear-gradient(90deg,#00f5a0,#00d9f5);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
@@ -115,10 +113,10 @@ canvas{
 </div>
 
 <div id="credits">
-    <h2>Created by ZebbyAnnan-Aka Anandhuz😌</h2>
-    <p>malludino.gg | Contest Edition</p>
+    <h2>Created by Anandhuz 😋</h2>
+    <p> tuff</p>
     <a class="socialBtn" href="https://www.instagram.com/i.wzieeeeeeeeeeeeeeeeeeeeeeeee/" target="_blank">
-        Visit My Instagram
+        Visit My Instagram!😉
     </a>
 </div>
 
@@ -127,17 +125,24 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let mode="normal";
-let dinoY=180;
+let dinoY=170;
 let velocity=0;
-let gravity=0.8;
+let gravity=0.7;
 let jumping=false;
 let obstacleX=900;
-let speed=7;
+let speed=6;
 let score=0;
 let gameRunning=false;
+let groundOffset=0;
+let cloudX=600;
 
 const rishiImg=new Image();
 rishiImg.src="rishi-dino.png";
+
+/* SOUND EFFECTS */
+const jumpSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+const normalDeathSound=new Audio("https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg");
+const rishiDeathSound=new Audio("rishi-death.mp3");
 
 function startGame(selectedMode){
     mode=selectedMode;
@@ -150,8 +155,10 @@ function startGame(selectedMode){
 
 function jump(){
     if(!jumping && gameRunning){
-        velocity=-15;
+        velocity=-14;
         jumping=true;
+        jumpSound.currentTime=0;
+        jumpSound.play();
     }
 }
 
@@ -162,24 +169,51 @@ function drawGround(){
     ctx.strokeStyle="#333";
     ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.moveTo(0,220);
-    ctx.lineTo(900,220);
+    ctx.moveTo(0,210);
+    ctx.lineTo(900,210);
     ctx.stroke();
+
+    for(let i=0;i<20;i++){
+        ctx.beginPath();
+        ctx.moveTo((i*60-groundOffset)%900,215);
+        ctx.lineTo((i*60+20-groundOffset)%900,215);
+        ctx.stroke();
+    }
+}
+
+function drawCloud(){
+    ctx.fillStyle="#ccc";
+    ctx.beginPath();
+    ctx.arc(cloudX,60,20,0,Math.PI*2);
+    ctx.arc(cloudX+25,60,25,0,Math.PI*2);
+    ctx.arc(cloudX+55,60,20,0,Math.PI*2);
+    ctx.fill();
+
+    cloudX-=1;
+    if(cloudX<-80) cloudX=900;
 }
 
 function drawDino(){
     if(mode==="normal"){
-        ctx.fillStyle="black";
+        ctx.fillStyle="#111";
         ctx.fillRect(80,dinoY,40,40);
-        ctx.fillRect(110,dinoY-10,15,20);
+        ctx.fillRect(110,dinoY-20,25,25);
+        ctx.fillStyle="white";
+        ctx.fillRect(125,dinoY-15,5,5);
+        ctx.fillStyle="#111";
+        let legOffset=Math.floor(Date.now()/100)%2===0?0:5;
+        ctx.fillRect(85,dinoY+40,8,15+legOffset);
+        ctx.fillRect(105,dinoY+40,8,15-legOffset);
     }else{
-        ctx.drawImage(rishiImg,80,dinoY,55,55);
+        ctx.drawImage(rishiImg,80,dinoY-10,55,55);
     }
 }
 
-function drawObstacle(){
+function drawCactus(){
     ctx.fillStyle="#228B22";
-    ctx.fillRect(obstacleX,185,30,60);
+    ctx.fillRect(obstacleX,170,20,40);
+    ctx.fillRect(obstacleX-10,180,10,15);
+    ctx.fillRect(obstacleX+20,175,10,20);
 }
 
 function update(){
@@ -188,23 +222,27 @@ function update(){
     velocity+=gravity;
     dinoY+=velocity;
 
-    if(dinoY>=180){
-        dinoY=180;
+    if(dinoY>=170){
+        dinoY=170;
         jumping=false;
     }
 
     obstacleX-=speed;
-    if(obstacleX<-20){
-        obstacleX=900;
+    groundOffset+=speed;
+
+    if(obstacleX<-40){
+        obstacleX=900+Math.random()*200;
         score++;
+        speed+=0.2;
         document.getElementById("score").innerText="Score: "+score;
     }
 
+    drawCloud();
     drawGround();
     drawDino();
-    drawObstacle();
+    drawCactus();
 
-    if(obstacleX<120 && obstacleX>60 && dinoY>160){
+    if(obstacleX<130 && obstacleX>60 && dinoY>150){
         endGame();
     }
 }
@@ -218,13 +256,21 @@ function gameLoop(){
 function endGame(){
     gameRunning=false;
     document.getElementById("gameOver").style.display="block";
+
+    if(mode==="normal"){
+        normalDeathSound.play();
+    }else{
+        rishiDeathSound.currentTime=0;
+        rishiDeathSound.play();
+    }
 }
 
 function restartGame(){
     obstacleX=900;
-    dinoY=180;
+    dinoY=170;
     velocity=0;
     score=0;
+    speed=6;
     document.getElementById("score").innerText="Score: 0";
     document.getElementById("gameOver").style.display="none";
     gameRunning=true;
