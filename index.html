@@ -7,113 +7,23 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-
-body{
-    font-family:'Montserrat',sans-serif;
-    background:#f2f2f2;
-    text-align:center;
-    color:#222;
-}
-
-h1{
-    margin-top:40px;
-    font-size:42px;
-    letter-spacing:2px;
-}
-
-.subtitle{
-    font-size:14px;
-    color:#666;
-    margin-bottom:40px;
-}
-
-#menu{
-    margin-top:30px;
-}
-
-.menuCard{
-    background:white;
-    width:400px;
-    margin:0 auto;
-    padding:40px;
-    border-radius:20px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.1);
-}
-
-button{
-    padding:14px 35px;
-    margin:10px;
-    font-size:15px;
-    border-radius:40px;
-    border:none;
-    cursor:pointer;
-    transition:0.25s;
-}
-
-.primaryBtn{
-    background:#222;
-    color:white;
-}
-
-.primaryBtn:hover{
-    background:#000;
-    transform:scale(1.05);
-}
-
-.secondaryBtn{
-    background:#e5e5e5;
-}
-
-.secondaryBtn:hover{
-    background:#d0d0d0;
-    transform:scale(1.05);
-}
-
-canvas{
-    display:none;
-    margin:40px auto;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.15);
-}
-
-#score{
-    display:none;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-#gameOver{
-    display:none;
-    margin-top:20px;
-}
-
-#exitBtn{
-    display:none;
-}
-
-#credits{
-    margin-top:80px;
-    padding:30px;
-    font-size:14px;
-    color:#777;
-}
-
-.socialBtn{
-    display:inline-block;
-    margin-top:15px;
-    padding:10px 25px;
-    border-radius:30px;
-    background:#000;
-    color:white;
-    text-decoration:none;
-    transition:0.3s;
-}
-
-.socialBtn:hover{
-    transform:scale(1.1);
-    background:#333;
-}
+body{font-family:'Montserrat',sans-serif;background:#f2f2f2;text-align:center;color:#222;}
+h1{margin-top:40px;font-size:42px;letter-spacing:2px;}
+.subtitle{font-size:14px;color:#666;margin-bottom:40px;}
+#menu{margin-top:30px;}
+.menuCard{background:white;width:400px;margin:0 auto;padding:40px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.1);}
+button{padding:14px 35px;margin:10px;font-size:15px;border-radius:40px;border:none;cursor:pointer;transition:0.25s;}
+.primaryBtn{background:#222;color:white;}
+.primaryBtn:hover{background:#000;transform:scale(1.05);}
+.secondaryBtn{background:#e5e5e5;}
+.secondaryBtn:hover{background:#d0d0d0;transform:scale(1.05);}
+canvas{display:none;margin:40px auto;background:white;border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,0.15);}
+#score{display:none;font-weight:bold;margin-top:10px;}
+#gameOver{display:none;margin-top:20px;}
+#exitBtn{display:none;}
+#credits{margin-top:80px;padding:30px;font-size:14px;color:#777;}
+.socialBtn{display:inline-block;margin-top:15px;padding:10px 25px;border-radius:30px;background:#000;color:white;text-decoration:none;transition:0.3s;}
+.socialBtn:hover{transform:scale(1.1);background:#333;}
 </style>
 </head>
 
@@ -158,11 +68,12 @@ let dinoY=170;
 let velocity=0;
 let gravity=0.7;
 let jumping=false;
-let obstacleX=900;
 let speed=6;
 let score=0;
 let gameRunning=false;
 let cloudX=600;
+
+let obstacles=[];
 
 const rishiImg=new Image();
 rishiImg.src="rishi-dino.png";
@@ -173,6 +84,7 @@ const rishiDeathSound=new Audio("deatheffect.rishi.mp3");
 
 function startGame(selectedMode){
     mode=selectedMode;
+    obstacles=[];
     document.getElementById("menu").style.display="none";
     canvas.style.display="block";
     document.getElementById("score").style.display="block";
@@ -210,24 +122,57 @@ function drawCloud(){
     ctx.arc(cloudX+25,60,25,0,Math.PI*2);
     ctx.arc(cloudX+55,60,20,0,Math.PI*2);
     ctx.fill();
-
     cloudX-=1;
     if(cloudX<-80) cloudX=900;
 }
 
+/* 🔥 NEW GREEN CHROME-STYLE DINO */
 function drawDino(){
+
     if(mode==="normal"){
-        ctx.fillStyle="#111";
-        ctx.fillRect(80,dinoY,40,40);
-        ctx.fillRect(110,dinoY-20,25,25);
+
+        ctx.fillStyle="#2ecc71";
+
+        // Body
+        ctx.fillRect(80, dinoY+10, 45, 30);
+
+        // Head
+        ctx.fillRect(115, dinoY-5, 25, 25);
+
+        // Eye
+        ctx.fillStyle="#000";
+        ctx.fillRect(132, dinoY+2, 4, 4);
+
+        ctx.fillStyle="#2ecc71";
+
+        // Arm
+        ctx.fillRect(95, dinoY+18, 10, 8);
+
+        // Tail
+        ctx.fillRect(70, dinoY+18, 12, 6);
+
+        // Legs
+        ctx.fillRect(85, dinoY+40, 8, 10);
+        ctx.fillRect(110, dinoY+40, 8, 10);
+
     }else{
         ctx.drawImage(rishiImg,80,dinoY-10,55,55);
     }
 }
 
-function drawCactus(){
-    ctx.fillStyle="#228B22";
-    ctx.fillRect(obstacleX,170,20,40);
+function spawnObstacle(){
+    let type=Math.random();
+    let obstacle={x:canvas.width+20,width:20,height:40};
+
+    if(type<0.4){
+        obstacle.width=20; obstacle.height=35;
+    }else if(type<0.7){
+        obstacle.width=25; obstacle.height=50;
+    }else{
+        obstacle.width=40; obstacle.height=40;
+    }
+
+    obstacles.push(obstacle);
 }
 
 function update(){
@@ -241,23 +186,41 @@ function update(){
         jumping=false;
     }
 
-    obstacleX-=speed;
+    if(obstacles.length===0 || 
+       obstacles[obstacles.length-1].x < canvas.width-(200+Math.random()*150)){
+        spawnObstacle();
+    }
 
-    if(obstacleX<-40){
-        obstacleX=900+Math.random()*200;
+    for(let i=0;i<obstacles.length;i++){
+        obstacles[i].x-=speed;
+
+        ctx.fillStyle="#228B22";
+        ctx.fillRect(
+            obstacles[i].x,
+            210-obstacles[i].height,
+            obstacles[i].width,
+            obstacles[i].height
+        );
+
+        if(
+            obstacles[i].x<130 &&
+            obstacles[i].x+obstacles[i].width>60 &&
+            dinoY>210-obstacles[i].height-40
+        ){
+            endGame();
+        }
+    }
+
+    if(obstacles.length>0 && obstacles[0].x<-50){
+        obstacles.shift();
         score++;
-        speed+=0.2;
+        speed+=0.15;
         document.getElementById("score").innerText="Score: "+score;
     }
 
     drawCloud();
     drawGround();
     drawDino();
-    drawCactus();
-
-    if(obstacleX<130 && obstacleX>60 && dinoY>150){
-        endGame();
-    }
 }
 
 function gameLoop(){
@@ -269,7 +232,6 @@ function gameLoop(){
 function endGame(){
     gameRunning=false;
     document.getElementById("gameOver").style.display="block";
-
     if(mode==="normal"){
         normalDeathSound.play();
     }else{
@@ -279,7 +241,7 @@ function endGame(){
 }
 
 function restartGame(){
-    obstacleX=900;
+    obstacles=[];
     dinoY=170;
     velocity=0;
     score=0;
@@ -292,7 +254,7 @@ function restartGame(){
 
 function backToMenu(){
     gameRunning=false;
-    obstacleX=900;
+    obstacles=[];
     dinoY=170;
     velocity=0;
     score=0;
