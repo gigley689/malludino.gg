@@ -269,20 +269,34 @@ function update(){
     dinoY+=velocity;
     if(dinoY>=170){ dinoY=170; jumping=false; }
 
+    /* 🔥 MORE NATURAL SPAWN DISTANCE */
     if(obstacles.length===0 || 
-       obstacles[obstacles.length-1].x < canvas.width-(200+Math.random()*150)){
+       obstacles[obstacles.length-1].x < canvas.width-(280+Math.random()*200)){
         spawnObstacle();
     }
 
     for(let i=0;i<obstacles.length;i++){
         obstacles[i].x-=speed;
+
         ctx.fillStyle="#228B22";
         ctx.fillRect(obstacles[i].x,210-obstacles[i].height,
                      obstacles[i].width,obstacles[i].height);
 
-        if(obstacles[i].x<130 &&
-           obstacles[i].x+obstacles[i].width>60 &&
-           dinoY>210-obstacles[i].height-40){
+        /* 🔥 IMPROVED HITBOX SYSTEM */
+        let dinoLeft = 85;
+        let dinoRight = 125;
+        let dinoTop = dinoY;
+        let dinoBottom = dinoY + 45;
+
+        let cactusLeft = obstacles[i].x + 5;
+        let cactusRight = obstacles[i].x + obstacles[i].width - 5;
+        let cactusTop = 210 - obstacles[i].height;
+
+        if(
+            dinoRight > cactusLeft &&
+            dinoLeft < cactusRight &&
+            dinoBottom > cactusTop
+        ){
             endGame();
         }
     }
