@@ -248,10 +248,25 @@ function update(){
         ctx.fillRect(obstacles[i].x,210-obstacles[i].height,
                      obstacles[i].width,obstacles[i].height);
 
-        if(obstacles[i].x<120 && obstacles[i].x+20>80 && dinoY>170){
-            endGame();
-        }
-    }
+        let dinoLeft = 80;
+let dinoRight = 125;
+let dinoTop = dinoY;
+let dinoBottom = dinoY + 45;
+
+let cactusLeft = obstacles[i].x;
+let cactusRight = obstacles[i].x + obstacles[i].width;
+let cactusTop = 210 - obstacles[i].height;
+let cactusBottom = 210;
+
+if(
+    dinoRight > cactusLeft &&
+    dinoLeft < cactusRight &&
+    dinoBottom > cactusTop
+){
+    endGame();
+}
+
+ }
 
     if(obstacles.length>0 && obstacles[0].x<-50){
         obstacles.shift();
